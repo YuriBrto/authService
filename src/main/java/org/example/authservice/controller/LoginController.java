@@ -22,7 +22,7 @@ public class LoginController {
     @PostMapping("/login")
     public ResponseEntity<?> authenticate(@RequestBody AuthRequest authRequest) {
         try {
-            // 1 - Tenta autenticar com o Spring AuthenticationManager
+            //Tentar autenticar com o Spring AuthenticationManager
             authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             authRequest.getEmail(),
@@ -30,18 +30,18 @@ public class LoginController {
                     )
             );
 
-            // 2 - Busca o usuário
-            UserDetails user = userRepository.findByEmail(authRequest.getEmail())
-                    .orElseThrow(() -> new RuntimeException("User not found"));
 
-            // 3 - Gera o token JWT
+            UserDetails user = userRepository.findByEmail(authRequest.getEmail())
+                    .orElseThrow(() -> new RuntimeException("Usuario não encontrado"));
+
+
             String jwt = jwtService.generateToken(user.getUsername());
 
-            // 4 - Retorna o token
+
             return ResponseEntity.ok(new AuthResponse(jwt));
 
         } catch (AuthenticationException e) {
-            return ResponseEntity.status(401).body("Invalid username or password");
+            return ResponseEntity.status(401).body("Usuario ou senha invalidos");
         }
     }
 
