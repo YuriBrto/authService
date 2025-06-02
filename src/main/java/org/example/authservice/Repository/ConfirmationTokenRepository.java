@@ -1,13 +1,4 @@
 package org.example.authservice.Repository;
 
-import org.example.authservice.Entity.ConfirmationToken;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-
-import java.util.Optional;
-
-@Repository
-public interface ConfirmationTokenRepository extends JpaRepository<ConfirmationToken, Long> {
-
-    Optional<ConfirmationToken> findByToken(String token);
+public class ConfirmationTokenRepository {
 }

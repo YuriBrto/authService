@@ -1,4 +1,4 @@
 package org.example.authservice.Entity;
 
-public class ConfirmationToken {
+public class UserResponse {
 }
