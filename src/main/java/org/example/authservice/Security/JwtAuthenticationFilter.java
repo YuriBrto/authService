@@ -1,27 +1,28 @@
-package org.example.authservice.security;
+package org.example.authservice.Security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.example.authservice.Security.JwtService;
-import org.example.authservice.Repository.AppUserRepository;
+import org.example.authservice.Entity.UserResponse;
+import org.example.authservice.Service.UserServiceClient;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Collections;
 
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
-    private final AppUserRepository userRepository;
+    private final UserServiceClient userServiceClient;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -41,15 +42,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         username = jwtService.extractUsername(jwt);
 
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userRepository.findByEmail(username)
-                    .orElseThrow(() -> new RuntimeException("User not found"));
+            // Chama o Feign Client
+            UserResponse userResponse = userServiceClient.getUserByEmail(username);
 
-            if (jwtService.isTokenValid(jwt, userDetails.getUsername())) {
+            if (userResponse != null && jwtService.isTokenValid(jwt, userResponse.getEmail())) {
+
+                // Cria autoridade baseada na role do userResponse
+                SimpleGrantedAuthority authority = new SimpleGrantedAuthority(userResponse.getRole());
+
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(
-                                userDetails,
-                                null,
-                                userDetails.getAuthorities()
+                                userResponse.getEmail(),  // Principal
+                                null,                     // Credentials não são necessárias aqui
+                                Collections.singletonList(authority)  // Autoridade da role
                         );
 
                 authToken.setDetails(

@@ -1,5 +1,6 @@
-package org.example.authservice.Entity;
+package org.example.authservice.Service;
 
+import org.example.authservice.Entity.UserResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
